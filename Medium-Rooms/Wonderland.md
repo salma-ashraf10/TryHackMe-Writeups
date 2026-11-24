@@ -2,6 +2,9 @@
 **Platform:** TryHackMe  
 **Machine:** Wonderland  
 **Difficulty:** Medium
+
+<img width="1803" height="396" alt="image" src="https://github.com/user-attachments/assets/cca17186-cb57-474c-b1d7-4019d214d292" />
+
 **Category:** Red Teaming
 
 ### Description
@@ -28,6 +31,8 @@ The scan retrieved two open ports:
 |---|---|
 | 22 | SSH | 
 | 80 | HTTP | 
+
+<img width="1920" height="780" alt="image" src="https://github.com/user-attachments/assets/12c25fa4-ddf8-400d-8586-08330a6045a6" />
 
 Since HTTP was available, I decided to investigate the web application first.
 
@@ -58,6 +63,9 @@ and again until I discovered the following path:
 /r/a/b/b/i/t
 ```
 
+<img width="1425" height="834" alt="image" src="https://github.com/user-attachments/assets/ae71f957-77b3-46d0-a53c-d9bb34434cc9" />
+
+
 ###### Credential Discovery
 
 I go to the discovered path and found credentials belonging to Alice in HTML code of the page (inspect):
@@ -65,6 +73,8 @@ I go to the discovered path and found credentials belonging to Alice in HTML cod
 ```
 alice:HowDothTheLittleCrocodileImproveHisShiningTail
 ```
+
+<img width="1920" height="859" alt="image" src="https://github.com/user-attachments/assets/8e434bea-9ca1-430c-aeb4-ad3467de1bed" />
 
 So let's use it for the SSH access.
 
@@ -79,7 +89,9 @@ And then put the password.
 
 After successfully authenticating, I obtained an interactive shell as Alice.
 
-#### 4. Initial Enumeration
+<img width="1920" height="783" alt="image" src="https://github.com/user-attachments/assets/9f5410f5-197b-4128-92c4-bad9239b2e3c" />
+
+### 4. Initial Enumeration
 
 After obtaining the initial shell as alice, I started enumerating the system to identify potential privilege escalation opportunities.
 
@@ -115,7 +127,7 @@ The output revealed that Alice could execute a Python script as Rabbit:
 
 This was the first interesting privilege escalation opportunity.
 
-## 5. Alice -> Rabbit: Python Module Hijacking
+### 5. Alice -> Rabbit: Python Module Hijacking
 
 I inspected the Python script:
 
@@ -134,6 +146,8 @@ for i in range(10):
     line = random.choice(poem.split("\n"))
     print("The line was:\t", line)
 ```
+
+<img width="1920" height="853" alt="image" src="https://github.com/user-attachments/assets/cb812765-3de4-4080-9cf1-668f3b3734f2" />
 
 ###### Vulnerability: Python Module Hijacking
 
@@ -188,8 +202,9 @@ uid=1002(rabbit) gid=1002(rabbit) groups=1002(rabbit)
 
 **Alice → Rabbit successful.**
 
+<img width="1920" height="207" alt="image" src="https://github.com/user-attachments/assets/3bff16a2-f60c-4f5b-a1c5-064fd9d4559a" />
 
-## 6. Rabbit -> Hatter: PATH Hijacking
+### 6. Rabbit -> Hatter: PATH Hijacking
 
 ### Enumeration
 
@@ -206,6 +221,7 @@ I inspected the binary:
 ```
 file /home/rabbit/teaParty
 ```
+<img width="1253" height="340" alt="image" src="https://github.com/user-attachments/assets/dc31dc6c-ebd0-4d66-8eab-c5be4a2e70cc" />
 
 It was identified as a 64-bit ELF executable with SUID and SGID permissions.
 
@@ -224,6 +240,8 @@ The output showed that the binary executed a shell command that eventually calle
 ```
 /bin/date --date=next hour -R
 ```
+
+<img width="1920" height="413" alt="image" src="https://github.com/user-attachments/assets/5eba5d15-8b8e-40e6-8b35-f211defd7366" />
 
 The important detail was that date was called without an absolute path.
 
@@ -255,6 +273,9 @@ Then I placed `/tmp` at the beginning of my PATH:
 ```bash
 export PATH=/tmp:$PATH
 ```
+<img width="1226" height="124" alt="image" src="https://github.com/user-attachments/assets/92b33455-ef1b-4dbd-8a35-4719ef96ac45" />
+
+But don't forget to change chmod to be excuteable.
 
 When the SUID binary attempted to execute `date`, the shell found `/tmp/date` before the legitimate system executable.
 
@@ -283,11 +304,15 @@ uid=1003(hatter) gid=1003(hatter) groups=1003(hatter)
 **Rabbit -> Hatter successful.**
 
 I found password.txt So, I used it to access hatter ssh
+
+<img width="1248" height="600" alt="image" src="https://github.com/user-attachments/assets/6b4f6955-7478-4d79-93a4-32953d1c71c8" />
+
 ```
 ssh hatter@thm.thm
 ```
+<img width="1920" height="791" alt="image" src="https://github.com/user-attachments/assets/e7d69b7c-ed76-4161-808a-a646de558bba" />
 
-## 5. Hatter -> Root: Linux Capabilities Abuse
+### 7. Hatter -> Root: Linux Capabilities Abuse
 
 ### Enumeration
 
@@ -349,6 +374,13 @@ uid=0(root) gid=1003(hatter) groups=1003(hatter)
 
 This confirmed that I had obtained root privileges.
 
+To get user flag:
+```
+find -type f -name user.txt
+cat /root/user.txt
+```
+<img width="1232" height="332" alt="image" src="https://github.com/user-attachments/assets/9cbc6310-fb69-48e1-8f59-f862bf8b0aa9" />
+
 To obtain a shell with both root UID and root GID:
 
 ### Establishing Persistent Root SSH Access
@@ -356,13 +388,15 @@ To obtain a shell with both root UID and root GID:
 I generated an RSA key pair on the machine:
 
 ```
-ssh-keygen -t rsa -b 4096 -f wonderland_root
+ssh-keygen -t rsa -b 4096 -f root_sc
 ```
 
 This generated two files:
 
-- `wonderland_root`: Private key.
-- `wonderland_root.pub`: Public key.
+- `root_sc`: Private key.
+- `root_sc.pub`: Public key.
+
+<img width="1331" height="586" alt="image" src="https://github.com/user-attachments/assets/89455ab1-6d54-458f-ba2d-caebdea038b5" />
 
 Since I already had root privileges on the target, I created the SSH directory:
 
@@ -375,8 +409,11 @@ I added the generated public key to root's authorized keys and copy/paste the pr
 
 ```bash
 nano /root/.ssh/authorized_keys
-nano wonderland_root
+nano root_sc --> # paste here the privat key to use it for access ssh
 ```
+
+<img width="1249" height="699" alt="image" src="https://github.com/user-attachments/assets/6c52fab8-1162-470b-9171-14a4dc5d0281" />
+
 
 I configured the correct permissions and ownership:
 
@@ -405,15 +442,18 @@ uid=0(root) gid=0(root) groups=0(root)
 
 This confirmed successful root SSH authentication using my generated RSA key pair.
 
-To get user flag:
-```
-find -type f -name user.txt
-cat /root/user.txt
-```
-
 To get root flag
 ```
 find -type f -name root.txt
 cat /home/alice/root.txt
 ```
 
+Alhamdulillah, The room was solved successfully!
+
+----
+
+[The room link](https://tryhackme.com/room/wonderland)
+
+See you in the next writeup, In sha' Allah!
+ 
+سبحانك اللهم وبحمدك، أشهد أن لا إله إلا أنت، أستغفرك وأتوب إليك.
