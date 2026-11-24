@@ -6,9 +6,12 @@ Documenting my TryHackMe journey through detailed writeups, and practical walkth
 
 | Challenge Name | Category | Difficulty | Write-up |
 |---|---|---|---|
+| Wonderland | Red Teaming | Medium | (See The Write-up)[https://github.com/salma-ashraf10/TryHackMe-Writeups/blob/main/Medium-Rooms/Wonderland.md]
 
+## Tools that was used
 
-
+- FFUF
+- Nmap 
 
 ## Author
 
